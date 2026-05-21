@@ -573,6 +573,21 @@ export async function claimFees({ position_address }) {
   }
 }
 
+// ─── Helper: Get token balance ─────────────────────
+async function getTokenBalance(mint) {
+  try {
+    const { getAssociatedTokenAddress } = await import("@solana/spl-token");
+    const wallet = (await import("../config.js")).default;
+    // Simplified: use Jupiter quote to estimate balance
+    const { getWalletBalances } = await import("./wallet.js");
+    const balances = await getWalletBalances();
+    const token = balances?.tokens?.find(t => t.mint === mint);
+    return token?.balance || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
 // ─── Close Position ────────────────────────────────────────────
 export async function closePosition({ position_address, reason }) {
   position_address = normalizeMint(position_address);
@@ -786,6 +801,27 @@ export async function closePosition({ position_address, reason }) {
       };
     }
 
+    // ─── Step 3: Auto-swap base token to SOL (for ALL closes) ──
+    let autoSwapResult = null;
+    const baseMint = pool.lbPair.tokenXMint.toString();
+    try {
+      const { swapToken } = await import("./wallet.js");
+      const balance = await getTokenBalance(baseMint);
+      if (balance > 0) {
+        log("close", `Step 3: Auto-swapping ${balance} base token to SOL`);
+        autoSwapResult = await swapToken({
+          input_mint: baseMint,
+          output_mint: "So11111111111111111111111111111111111111112",
+          amount: balance,
+        });
+        log("close", `Step 3 OK: Swapped to SOL — received ${autoSwapResult?.amount_out || '?'} SOL`);
+      } else {
+        log("close", `Step 3: No base token balance to swap`);
+      }
+    } catch (e) {
+      log("close_warn", `Step 3 (Auto-swap) failed: ${e.message}`);
+    }
+
     return {
       success: true,
       position: position_address,
@@ -794,7 +830,9 @@ export async function closePosition({ position_address, reason }) {
       claim_txs: claimTxHashes,
       close_txs: closeTxHashes,
       txs: txHashes,
-      base_mint: pool.lbPair.tokenXMint.toString(),
+      base_mint: baseMint,
+      auto_swapped: autoSwapResult !== null,
+      sol_received: autoSwapResult?.amount_out || null,
     };
   } catch (error) {
     log("close_error", error.message);
