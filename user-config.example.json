@@ -1,0 +1,79 @@
+{
+  "risk": {
+    "maxPositions": 3,
+    "maxDeployAmount": 50
+  },
+  "screening": {
+    "minFeeActiveTvlRatio": 0.3,
+    "minTvl": 10000,
+    "maxTvl": 150000,
+    "minVolume": 5000,
+    "minOrganic": 72,
+    "minHolders": 500,
+    "minMcap": 150000,
+    "maxMcap": 10000000,
+    "minBinStep": 80,
+    "maxBinStep": 125,
+    "timeframe": "5m",
+    "category": "trending",
+    "minTokenFeesSol": 40,
+    "maxBundlersPct": 30,
+    "maxBotHoldersPct": 30,
+    "maxTop10Pct": 60,
+    "blockedLaunchpads": ["pump.fun", "letsbonk.fun"],
+    "minTokenAgeHours": 2,
+    "athFilterPct": -30,
+    "maxVolatility": 4,
+    "blockPvpSymbols": true,
+    "pvpSymbols": ["PvP", "pvp", "PVP", "CTO", "cto", "Cto"]
+  },
+  "strategy": {
+    "strategy": "bid_ask",
+    "binsBelow": 69,
+    "minBinsBelow": 35,
+    "maxBinsBelow": 69,
+    "spotMinVolume": 10000,
+    "spotMinFeeActiveTvlRatio": 0.5
+  },
+  "management": {
+    "minClaimAmount": 5,
+    "autoSwapAfterClaim": true,
+    "outOfRangeBinsToClose": 10,
+    "outOfRangeWaitMinutes": 30,
+    "minVolumeToRebalance": 1000,
+    "stopLossPct": -12,
+    "hardStopPct": -15,
+    "takeProfitPct": 8,
+    "trailingTakeProfit": true,
+    "trailingTriggerPct": 5,
+    "trailingDropPct": 2.5,
+    "minFeePerTvl24h": 7,
+    "minAgeBeforeYieldCheck": 60,
+    "minSolToOpen": 0.55,
+    "deployAmountSol": 0.5,
+    "gasReserve": 0.2,
+    "positionSizePct": 0.3,
+    "maxHoldHours": 72
+  },
+  "schedule": {
+    "managementIntervalMin": 10,
+    "screeningIntervalMin": 45,
+    "healthCheckIntervalMin": 60
+  },
+  "llm": {
+    "temperature": 0.2,
+    "maxTokens": 4096,
+    "maxSteps": 20,
+    "managementModel": "openrouter/owl-alpha",
+    "screeningModel": "openrouter/owl-alpha",
+    "generalModel": "openrouter/owl-alpha"
+  },
+  "whaleGuard": {
+    "enabled": true,
+    "minQuoteDrainUsd": 12000,
+    "minTvlDropPct": 18,
+    "windowMinutes": 5,
+    "cooldownMinutes": 10,
+    "autoClose": true
+  }
+}

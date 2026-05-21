@@ -1,0 +1,29 @@
+{
+  "name": "hermes-dlmm",
+  "version": "2.0.0",
+  "description": "Autonomous DLMM LP bot for Solana Meteora — enhanced with anti-rug, Darwinian learning, whale guard & GMGN integration",
+  "type": "module",
+  "private": true,
+  "bin": { "hermes": "./cli.js" },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "DRY_RUN=true node index.js",
+    "setup": "node setup.js",
+    "test:screen": "node test/test-screening.js",
+    "test:agent": "node test/test-agent.js",
+    "postinstall": "node scripts/patch-anchor.js",
+    "dashboard": "node lpgoose-dashboard/server.js"
+  },
+  "dependencies": {
+    "@meteora-ag/dlmm": "^1.6.20",
+    "@solana/web3.js": "^1.98.4",
+    "@solana/spl-token": "^0.4.12",
+    "bn.js": "^5.2.1",
+    "bs58": "^6.0.0",
+    "dotenv": "^16.4.7",
+    "jsonrepair": "^3.11.2",
+    "node-cron": "^3.0.3",
+    "openai": "^4.86.2",
+    "axios": "^1.7.9"
+  }
+}

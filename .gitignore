@@ -1,0 +1,13 @@
+node_modules/
+.env
+user-config.json
+strategy-library.json
+signal-weights.json
+smart-wallets.json
+token-blacklist.json
+pool-memory.json
+state.json
+pool-deploy-history.json
+logs/
+*.log
+.DS_Store
