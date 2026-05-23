@@ -111,21 +111,31 @@ function deepMerge(base, override) {
 }
 
 export function loadConfig() {
+  console.error('[config] ROOT:', ROOT);
   let fileConfig = {};
   const configPath = join(ROOT, 'user-config.json');
+  console.error('[config] configPath:', configPath);
   if (existsSync(configPath)) {
     try {
-      fileConfig = JSON.parse(readFileSync(configPath, 'utf-8'));
+      const raw = readFileSync(configPath, 'utf-8');
+      console.error('[config] raw (first 200 chars):', raw.slice(0, 200));
+      console.error('[config] fileConfig keys:', Object.keys(JSON.parse(readFileSync(configPath, 'utf-8'))));
+      fileConfig = JSON.parse(raw);
     } catch (e) {
       console.error('[config] parse error, using defaults');
     }
   }
+  console.error('[config] fileConfig.management:', fileConfig.management);
   config = deepMerge(DEFAULT_CONFIG, fileConfig);
   computeDerived();
   return config;
 }
 
 function computeDerived() {
+  if (!config.management) {
+    console.error('[config] management missing — skipping computeDerived');
+    return;
+  }
   const minSol = config.management.minSolToOpen;
   const deployAmt = config.management.deployAmountSol;
   config.management.computeDeployAmount = (walletSol) => {
@@ -182,6 +192,12 @@ for (const [env, cfgPath] of Object.entries(ENV_KEYS)) {
 }
 
 // ─── Init ────────────────────────────────────────────────────────
-loadConfig();
+loadConfig();  // Load base config first
+
+// Apply env overrides after config is loaded
+for (const [env, cfgPath] of Object.entries(ENV_KEYS)) {
+  if (process.env[env]) { updateConfig(cfgPath, process.env[env]); }
+}
+
 export { config, DEFAULT_CONFIG };
 export default config;

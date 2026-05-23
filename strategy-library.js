@@ -96,6 +96,40 @@ export function addStrategy(strategy) {
   return strategy;
 }
 
+export function removeStrategy(id) {
+  const idx = strategies.findIndex(s => s.id === id);
+  if (idx === -1) return { error: `Strategy ${id} not found` };
+  const removed = strategies.splice(idx, 1)[0];
+  saveStrategies();
+  return { removed, remaining: strategies.map(s => s.id) };
+}
+
+export function setActiveStrategy(id) {
+  const found = strategies.find(s => s.id === id);
+  if (!found) return { error: `Strategy ${id} not found` };
+  process.env.ACTIVE_STRATEGY = id;
+  return { active_strategy: id, strategy: found };
+}
+
+export function listStrategies() {
+  const activeId = process.env.ACTIVE_STRATEGY || 'bid_ask';
+  return {
+    active_id: activeId,
+    strategies: strategies.map(s => ({
+      id: s.id,
+      name: s.name,
+      description: s.description,
+      best_for: s.best_for,
+      active: s.id === activeId,
+    })),
+  };
+}
+
+export function getActiveStrategy() {
+  const activeId = process.env.ACTIVE_STRATEGY || 'bid_ask';
+  return strategies.find(s => s.id === activeId) || strategies[0];
+}
+
 export function getStrategyForPrompt() {
   const active = strategies.find(s => s.id === (process.env.ACTIVE_STRATEGY || 'bid_ask'));
   if (!active) return strategies[0];
