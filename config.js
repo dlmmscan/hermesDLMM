@@ -199,4 +199,5 @@ for (const [env, cfgPath] of Object.entries(ENV_KEYS)) {
 }
 computeDerived();
 
+export { config, DEFAULT_CONFIG };
 export default config;
