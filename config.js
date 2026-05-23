@@ -111,21 +111,15 @@ function deepMerge(base, override) {
 }
 
 export function loadConfig() {
-  console.error('[config] ROOT:', ROOT);
   let fileConfig = {};
   const configPath = join(ROOT, 'user-config.json');
-  console.error('[config] configPath:', configPath);
   if (existsSync(configPath)) {
     try {
-      const raw = readFileSync(configPath, 'utf-8');
-      console.error('[config] raw (first 200 chars):', raw.slice(0, 200));
-      console.error('[config] fileConfig keys:', Object.keys(JSON.parse(readFileSync(configPath, 'utf-8'))));
-      fileConfig = JSON.parse(raw);
+      fileConfig = JSON.parse(readFileSync(configPath, 'utf-8'));
     } catch (e) {
       console.error('[config] parse error, using defaults');
     }
   }
-  console.error('[config] fileConfig.management:', fileConfig.management);
   config = deepMerge(DEFAULT_CONFIG, fileConfig);
   computeDerived();
   return config;
@@ -187,17 +181,22 @@ const ENV_KEYS = {
   OKX_PASSPHRASE: 'okx.passphrase',
 };
 
-for (const [env, cfgPath] of Object.entries(ENV_KEYS)) {
-  if (process.env[env]) { updateConfig(cfgPath, process.env[env]); }
-}
-
 // ─── Init ────────────────────────────────────────────────────────
-loadConfig();  // Load base config first
+loadConfig();  // Load base config first (reads user-config.json + defaults)
 
-// Apply env overrides after config is loaded
+// Apply env overrides IN-MEMORY only — do NOT save to user-config.json here.
+// user-config.json is the user's source of truth and must not be overwritten on startup.
 for (const [env, cfgPath] of Object.entries(ENV_KEYS)) {
-  if (process.env[env]) { updateConfig(cfgPath, process.env[env]); }
+  if (process.env[env]) {
+    const parts = cfgPath.split('.');
+    let target = config;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (!target[parts[i]]) target[parts[i]] = {};
+      target = target[parts[i]];
+    }
+    target[parts[parts.length - 1]] = process.env[env];
+  }
 }
+computeDerived();
 
-export { config, DEFAULT_CONFIG };
 export default config;
